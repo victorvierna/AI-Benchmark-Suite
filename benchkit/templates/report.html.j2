@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>BenchKit Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; color: #222; }
+    h1, h2 { margin: 0 0 8px 0; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 24px; }
+    th, td { border: 1px solid #ddd; padding: 8px; font-size: 13px; }
+    th { background: #f4f4f4; text-align: left; }
+    .muted { color: #666; font-size: 12px; }
+    details { margin-bottom: 12px; }
+    pre { background: #f9f9f9; padding: 12px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <h1>BenchKit Report</h1>
+  <div class="muted">Suite: {{ summary.suite_id }} (v{{ summary.suite_version }})</div>
+  <div class="muted">Started: {{ summary.started_at }} | Finished: {{ summary.finished_at }}</div>
+  {% if summary.stopped_reason %}
+  <div class="muted">Stopped: {{ summary.stopped_reason }}</div>
+  {% endif %}
+
+  <h2>Models</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>Pass rate</th>
+        <th>Passed</th>
+        <th>p50 (ms)</th>
+        <th>p95 (ms)</th>
+        <th>Avg (ms)</th>
+        <th>Cost (USD)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in summary.models %}
+      <tr>
+        <td>{{ m.label or m.name }}</td>
+        <td>{{ '%.3f'|format(m.pass_rate) }}</td>
+        <td>{{ m.passed }}/{{ m.total }}</td>
+        <td>{{ m.latency_ms_p50 }}</td>
+        <td>{{ m.latency_ms_p95 }}</td>
+        <td>{{ m.latency_ms_avg }}</td>
+        <td>{{ m.cost_usd_total }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Attempts</h2>
+  {% for a in attempts %}
+  <details>
+    <summary>{{ a.model.label or a.model.name }} - {{ a.case_id }} - pass={{ a.eval.pass }}</summary>
+    <div class="muted">Latency: {{ a.timing.latency_ms }} ms | Cost: {{ a.cost_usd }}</div>
+    <pre>{{ a.request | tojson(indent=2) }}</pre>
+    <pre>{{ a.response | tojson(indent=2) }}</pre>
+  </details>
+  {% endfor %}
+</body>
+</html>

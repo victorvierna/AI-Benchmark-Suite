@@ -1,0 +1,11 @@
+schema_version: 1
+version: "2026-01-01"
+currency: USD
+providers:
+  openai:
+    gpt-4o-mini-2024-07-18:
+      input_per_1m_tokens: 0.0
+      output_per_1m_tokens: 0.0
+    gpt-4.1-mini:
+      input_per_1m_tokens: 0.0
+      output_per_1m_tokens: 0.0

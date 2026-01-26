@@ -1,0 +1,12 @@
+schema_version: 1
+models:
+  - provider: openai
+    name: gpt-4o-mini-2024-07-18
+    label: 4o-mini
+    params:
+      temperature: 0
+  - provider: openai
+    name: gpt-4.1-mini
+    label: 4.1-mini
+    params:
+      temperature: 0

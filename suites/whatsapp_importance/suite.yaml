@@ -1,0 +1,59 @@
+id: whatsapp_importance
+version: 1
+description: "Clasifica mensajes de WhatsApp como important/not_important y detecta auto-replies."
+provider: openai
+
+request:
+  type: openai_responses
+  system: |
+    Eres un asistente que clasifica mensajes de WhatsApp de clientes para un negocio de reservas. Devuelves unicamente JSON con los campos 'importance', 'isAutoReply' y 'reason'.
+  user_template: |
+    Clasifica este mensaje de WhatsApp recibido por un negocio que gestiona citas.
+    Responde con JSON, indicando si es una respuesta automatica y si requiere atencion humana inmediata.
+    Marca isAutoReply=true cuando el mensaje sea una respuesta automatica del usuario (p.ej. "Gracias por ponerte en contacto...", "Estoy fuera de la oficina...", "Respondere mas tarde...", "Este numero no atiende...").
+    Marca isAutoReply=false cuando sea un mensaje real del cliente.
+    Marca importance='not_important' para confirmaciones breves, agradecimientos, emojis, reacciones o mensajes sin peticion clara.
+    Marca importance='important' cuando el remitente solicita ayuda, hace cambios, aporta info nueva o espera respuesta.
+    Si hay dudas y no es auto-reply, elige 'important'.
+
+    Mensaje: """{{ input.text }}"""
+  response_format:
+    type: json_schema
+    name: message_importance
+    strict: true
+    schema:
+      type: object
+      properties:
+        importance: { type: string, enum: [important, not_important] }
+        isAutoReply: { type: boolean }
+        reason: { type: string }
+      required: [importance, isAutoReply, reason]
+      additionalProperties: false
+  params:
+    temperature: 0
+    max_output_tokens: 200
+
+dataset:
+  path: cases.jsonl
+
+evaluation:
+  mode: binary
+  evaluator:
+    type: composite
+    all:
+      - type: json_schema
+      - type: exact_fields
+        fields:
+          - path: $.importance
+            expected_from: expected.importance
+          - path: $.isAutoReply
+            expected_from: expected.isAutoReply
+
+output:
+  save_requests: true
+  save_raw_responses: true
+
+redact:
+  enabled: false
+  patterns: []
+  replacement: "***"

@@ -1,0 +1,33 @@
+id: simple_suite
+version: 1
+provider: openai
+request:
+  type: openai_responses
+  user_template: |
+    Echo: {{ input.text }}
+  response_format:
+    type: json_schema
+    name: result
+    strict: true
+    schema:
+      type: object
+      properties:
+        label: { type: string }
+      required: [label]
+      additionalProperties: false
+  params:
+    temperature: 0
+
+dataset:
+  path: simple_cases.jsonl
+
+evaluation:
+  mode: binary
+  evaluator:
+    type: composite
+    all:
+      - type: json_schema
+      - type: exact_fields
+        fields:
+          - path: $.label
+            expected_from: expected.label

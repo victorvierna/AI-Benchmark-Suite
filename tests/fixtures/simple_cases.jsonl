@@ -1,0 +1,2 @@
+{"id":"T1","input":{"text":"a"},"expected":{"label":"ok"}}
+{"id":"T2","input":{"text":"b"},"expected":{"label":"ok"}}

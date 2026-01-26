@@ -1,0 +1,7 @@
+schema_version: 1
+currency: USD
+providers:
+  openai:
+    gpt-test:
+      input_per_1m_tokens: 1.0
+      output_per_1m_tokens: 2.0

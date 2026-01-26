@@ -1,0 +1,10 @@
+{"id":"C01","input":{"text":"Ok gracias!"},"expected":{"importance":"not_important","isAutoReply":false}}
+{"id":"C02","input":{"text":"👍"},"expected":{"importance":"not_important","isAutoReply":false}}
+{"id":"C03","input":{"text":"Hola, puedo cambiar mi cita para manana?"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C04","input":{"text":"Estoy fuera de la oficina, respondere mas tarde."},"expected":{"importance":"not_important","isAutoReply":true}}
+{"id":"C05","input":{"text":"Este numero no atiende llamadas."},"expected":{"importance":"not_important","isAutoReply":true}}
+{"id":"C06","input":{"text":"Perfecto, confirmado"},"expected":{"importance":"not_important","isAutoReply":false}}
+{"id":"C07","input":{"text":"Necesito cancelar mi cita"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C08","input":{"text":"Llegare 15 minutos tarde"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C09","input":{"text":"Buenas, cual es el precio?"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C10","input":{"text":"Gracias por ponerte en contacto con nosotros. Te responderemos pronto."},"expected":{"importance":"not_important","isAutoReply":true}}

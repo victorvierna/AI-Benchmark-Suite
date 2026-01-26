@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "benchkit"
+version = "0.1.0"
+description = "Lightweight LLM benchmark framework"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Apuntalo" }
+]
+dependencies = [
+  "pydantic>=2.6",
+  "PyYAML>=6.0",
+  "Jinja2>=3.1",
+  "jsonschema>=4.21",
+  "requests>=2.31",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=4.1",
+  "responses>=0.25",
+]
+
+[project.scripts]
+benchkit = "benchkit.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "." }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["benchkit*"]
+
+[tool.pytest.ini_options]
+addopts = "-q"

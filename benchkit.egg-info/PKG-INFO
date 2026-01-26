@@ -1,0 +1,63 @@
+Metadata-Version: 2.4
+Name: benchkit
+Version: 0.1.0
+Summary: Lightweight LLM benchmark framework
+Author: Apuntalo
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic>=2.6
+Requires-Dist: PyYAML>=6.0
+Requires-Dist: Jinja2>=3.1
+Requires-Dist: jsonschema>=4.21
+Requires-Dist: requests>=2.31
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.1; extra == "dev"
+Requires-Dist: responses>=0.25; extra == "dev"
+
+# BenchKit (local)
+
+Minimal LLM benchmarking framework used in this repo. The design is documented in `benchmark_framework.md` at the repo root.
+
+## Setup
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+For live runs, set your API key:
+
+```bash
+export OPENAI_API_KEY=...
+```
+
+## Quickstart
+
+```bash
+# Validate a suite
+benchkit validate suites/whatsapp_importance/suite.yaml --models models.example.yaml --pricing pricing/openai.yaml
+
+# Run a suite
+benchkit run suites/whatsapp_importance/suite.yaml --models models.example.yaml --pricing pricing/openai.yaml --runs 1
+```
+
+Scaffold a new suite:
+
+```bash
+benchkit init-suite my_suite --base-dir suites
+```
+
+## Files
+
+- `benchkit/`: core package
+- `suites/`: benchmark suites
+- `pricing/`: price tables
+- `results/`: generated outputs (ignored by git)
+
+## Notes
+
+- No network calls are made unless you run `benchkit run` or `benchkit doctor --ping`.
+- Use `OPENAI_API_KEY` for OpenAI provider.
