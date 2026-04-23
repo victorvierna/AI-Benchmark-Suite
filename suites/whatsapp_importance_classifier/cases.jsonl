@@ -1,0 +1,40 @@
+{"id":"C01","input":{"text":"Ok gracias!"},"expected":{"importance":"not_important","isAutoReply":false}}
+{"id":"C02","input":{"text":"[pulgar arriba]"},"expected":{"importance":"not_important","isAutoReply":false}}
+{"id":"C03","input":{"text":"Hola, puedo cambiar mi cita para manana?"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C04","input":{"text":"Estoy fuera de la oficina hasta el lunes. Respondere mas tarde."},"expected":{"importance":"not_important","isAutoReply":true}}
+{"id":"C05","input":{"text":"Mensaje automatico: este numero no recibe mensajes."},"expected":{"importance":"not_important","isAutoReply":true}}
+{"id":"C06","input":{"text":"Confirmado, nos vemos."},"expected":{"importance":"not_important","isAutoReply":false}}
+{"id":"C07","input":{"text":"Necesito cancelar mi cita de hoy."},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C08","input":{"text":"Llegare 10 minutos tarde."},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C09","input":{"text":"Buenas, cual es el precio del servicio?"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C10","input":{"text":"Gracias por comunicarte con nosotros. Te responderemos pronto."},"expected":{"importance":"not_important","isAutoReply":true}}
+{"id":"C11","input":{"text":"Hola"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C12","input":{"text":"Podemos mover la cita al jueves a las 18?"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C13","input":{"text":"Recibido."},"expected":{"importance":"not_important","isAutoReply":false}}
+{"id":"C14","input":{"text":"Estoy en la puerta, pueden abrir?"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C15","input":{"text":"Me pasas la direccion exacta, por favor?"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C16","input":{"text":"Soy Ana, mi reserva es a las 5, somos 2 personas."},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C17","input":{"text":"Gracias!"},"expected":{"importance":"not_important","isAutoReply":false}}
+{"id":"C18","input":{"text":"Mensaje automatico: he cambiado de numero, este chat no esta activo."},"expected":{"importance":"not_important","isAutoReply":true}}
+{"id":"C19","input":{"text":"No puedo hoy, podemos reprogramar para la proxima semana?"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C20","input":{"text":"Ok"},"expected":{"importance":"not_important","isAutoReply":false}}
+{"id":"C21","input":{"text":"Te puedo pagar por Bizum ahora?"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C22","input":{"text":"Ya esta pagado, te mando el justificante por aqui."},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C23","input":{"text":"Perfecto, muchas gracias por avisar."},"expected":{"importance":"not_important","isAutoReply":false}}
+{"id":"C24","input":{"text":"No encuentro el local, me puedes orientar?"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C25","input":{"text":"Voy con un nino pequeno, hay algun problema?"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C26","input":{"text":"AUTO-RESPUESTA: estoy conduciendo y no puedo contestar ahora."},"expected":{"importance":"not_important","isAutoReply":true}}
+{"id":"C27","input":{"text":"El horario de manana sigue igual?"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C28","input":{"text":"Vale"},"expected":{"importance":"not_important","isAutoReply":false}}
+{"id":"C29","input":{"text":"Puedes llamarme cuando puedas?"},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C30","input":{"text":"No hace falta, ya lo he solucionado."},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C31","input":{"text":"Me ha llegado un cargo doble en la tarjeta."},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C32","input":{"text":"Feliz dia!"},"expected":{"importance":"not_important","isAutoReply":false}}
+{"id":"C33","input":{"text":"Confirmo asistencia de Lucia y Marta."},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C34","input":{"text":"Le doy a cancelar y no me deja."},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C35","input":{"text":"Mensaje automatico: esta cuenta de WhatsApp Business ya no esta disponible."},"expected":{"importance":"not_important","isAutoReply":true}}
+{"id":"C36","input":{"text":"Si"},"expected":{"importance":"not_important","isAutoReply":false}}
+{"id":"C37","input":{"text":"Si, quiero el turno de las 18:00."},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C38","input":{"text":"He cambiado de opinion, prefiero hacerlo presencial."},"expected":{"importance":"important","isAutoReply":false}}
+{"id":"C39","input":{"text":"Respuesta automatica: no puedo responder ahora, estoy en una reunion."},"expected":{"importance":"not_important","isAutoReply":true}}
+{"id":"C40","input":{"text":"Todo correcto."},"expected":{"importance":"not_important","isAutoReply":false}}

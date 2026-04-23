@@ -8,7 +8,7 @@ BenchKit is a small, local-first benchmarking harness for LLM tasks. A benchmark
 - **Dataset** (`cases.jsonl`): One JSON object per line. Each case must have `id` and `input` (object). `expected` is optional but required for most evaluators.
 - **Models** (`models.yaml`): Lists provider + model name + parameters. Used to compare multiple models in one run.
 - **Pricing** (`pricing/*.yaml`): Optional table for cost estimation (per 1M tokens).
-- **Provider**: A thin client that sends requests to an LLM API. v0.1 supports OpenAI Responses.
+- **Provider**: A thin client that sends requests to an LLM API. Current providers support OpenAI Responses, Gemini GenerateContent, Anthropic Messages, and LM Studio Responses.
 - **Evaluators**: JSON schema validation + exact field checks; composed via `type: composite`.
 - **Results**: `attempts.jsonl` (per-case outputs) and `summary.json` (aggregated metrics). Optional `report.html`.
 
@@ -16,7 +16,7 @@ BenchKit is a small, local-first benchmarking harness for LLM tasks. A benchmark
 
 1. Load suite, models, and pricing configs.
 2. Load dataset and apply optional filters/limit.
-3. For each model, run each case (plus warmup if configured).
+3. For each model, select the provider declared in `models.yaml`, then run each case (plus warmup if configured).
 4. Evaluate output against suite rules.
 5. Record per-attempt data and compute summary metrics.
 
@@ -25,6 +25,8 @@ BenchKit is a small, local-first benchmarking harness for LLM tasks. A benchmark
 - `benchkit/cli.py`: CLI commands (validate, run, report, diff, init-suite).
 - `benchkit/runner.py`: Execution loop and summary aggregation.
 - `benchkit/providers/openai_responses.py`: OpenAI Responses provider.
+- `benchkit/providers/gemini_generate_content.py`: Gemini GenerateContent provider.
+- `benchkit/providers/anthropic_messages.py`: Anthropic Messages provider.
 - `benchkit/evaluators/`: JSON schema + exact field evaluation.
 - `benchkit/templates/report.html.j2`: HTML report template.
 - `suites/`: Example benchmark suites.
@@ -59,4 +61,4 @@ If the suite defines redaction patterns and redaction is enabled, requests and r
 
 ## Extending Providers
 
-Add a provider in `benchkit/providers/` implementing `ProviderClient.run()`, then update runner provider selection to support the new provider key in suite configs.
+Add a provider in `benchkit/providers/` implementing `ProviderClient.run()`, then update runner provider selection to support the new provider key in model configs.

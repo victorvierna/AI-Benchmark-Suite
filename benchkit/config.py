@@ -10,9 +10,10 @@ class ResponseFormatConfig(BaseModel):
     type: str
     name: Optional[str] = None
     strict: Optional[bool] = None
-    schema: Optional[Dict[str, Any]] = None
+    schema_: Optional[Dict[str, Any]] = Field(default=None, alias="schema")
 
     class Config:
+        populate_by_name = True
         extra = "allow"
 
 

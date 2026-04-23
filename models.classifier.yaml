@@ -1,0 +1,32 @@
+schema_version: 1
+models:
+  - provider: openai
+    name: gpt-5.4-nano
+    label: openai-5.4-nano
+    params:
+      temperature: 0
+  - provider: openai
+    name: gpt-5.4-mini
+    label: openai-5.4-mini
+    params:
+      temperature: 0
+  - provider: gemini
+    name: gemini-3.1-flash-lite-preview
+    label: gemini-3.1-flash-lite-preview
+    params:
+      temperature: 0
+  - provider: gemini
+    name: gemini-2.5-flash-lite
+    label: gemini-2.5-flash-lite
+    params:
+      temperature: 0
+  - provider: anthropic
+    name: claude-haiku-4-5-20251001
+    label: claude-haiku-4.5
+    params:
+      temperature: 0
+  - provider: anthropic
+    name: claude-sonnet-4-6
+    label: claude-sonnet-4.6
+    params:
+      temperature: 0

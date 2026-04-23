@@ -6,6 +6,7 @@ import sys
 from typing import List, Optional
 
 from .config import load_models, load_pricing, load_suite, ValidationError
+from .env import load_env, get_anthropic_api_key, get_gemini_api_key, get_openai_api_key
 from .dataset import DatasetError, filter_cases, load_cases
 from .doctor import run_doctor
 from .report import print_console_summary, render_html_report, load_json
@@ -31,6 +32,19 @@ def _parse_duration(value: Optional[str]) -> Optional[int]:
     if s.endswith("h"):
         return int(float(s[:-1]) * 3600)
     return int(float(s))
+
+
+def _missing_api_keys(models) -> List[str]:
+    providers = {m.provider for m in models.models}
+    missing: List[str] = []
+    if "openai" in providers and not get_openai_api_key():
+        missing.append("OPENAI_API_KEY")
+    if "gemini" in providers and not get_gemini_api_key():
+        missing.append("GEMINI_API_KEY")
+    if "anthropic" in providers and not get_anthropic_api_key():
+        missing.append("ANTHROPIC_API_KEY")
+    return missing
+
 
 def cmd_validate(args: argparse.Namespace) -> int:
     try:
@@ -96,6 +110,12 @@ def cmd_run(args: argparse.Namespace) -> int:
         except (ValidationError, Exception) as e:
             print(f"Pricing config error: {e}")
             return 2
+
+    missing_keys = _missing_api_keys(models)
+    if missing_keys:
+        joined = ", ".join(missing_keys)
+        print(f"{joined} missing (set them in env or .env file).")
+        return 2
 
     # validate dataset early
     try:
@@ -287,6 +307,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    load_env()
     parser = build_parser()
     args = parser.parse_args(argv)
     if not hasattr(args, "func"):

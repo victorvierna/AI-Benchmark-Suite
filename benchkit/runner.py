@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import time
+import sys
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -11,10 +12,53 @@ from .config import ModelsConfig, SuiteConfig
 from .dataset import filter_cases, load_cases
 from .evaluators import evaluate_all, evaluate_exact_fields, evaluate_json_schema
 from .pricing import compute_cost_usd
-from .providers.openai_responses import OpenAIResponsesProvider
+from .providers import (
+    AnthropicMessagesProvider,
+    GeminiGenerateContentProvider,
+    LMStudioResponsesProvider,
+    OpenAIResponsesProvider,
+)
 from .template import render_with_case
 from .types import AttemptRecord, EvalResult, FailureReason, LLMRequest, ModelSummary, Summary, Usage
 from .redact import redact_text
+
+try:
+    from tqdm import tqdm
+except Exception:  # pragma: no cover - fallback when tqdm isn't installed
+    tqdm = None
+
+
+class _NullProgress:
+    def update(self, n: int = 1) -> None:
+        return
+
+    def set_postfix(self, **kwargs: Any) -> None:
+        return
+
+    def close(self) -> None:
+        return
+
+
+def _make_progress(total: int, desc: str, position: int, disable: bool) -> object:
+    if tqdm is None:
+        return _NullProgress()
+    return tqdm(
+        total=total,
+        desc=desc,
+        position=position,
+        leave=False,
+        ascii=True,
+        unit="req",
+        disable=disable,
+    )
+
+
+def _format_usd(value: Optional[float]) -> str:
+    if value is None:
+        return "n/a"
+    if value < 0.01:
+        return f"${value:.6f}"
+    return f"${value:.4f}"
 
 
 def _now_iso() -> str:
@@ -55,13 +99,25 @@ def _build_request(suite: SuiteConfig, model: Dict[str, Any], case: Dict[str, An
     }
 
     if suite.request.response_format:
-        payload["text"] = {"format": suite.request.response_format.model_dump(exclude_none=True)}
+        payload["text"] = {"format": suite.request.response_format.model_dump(exclude_none=True, by_alias=True)}
 
     # merge params: suite first, then model overrides
     payload.update(suite.request.params)
     payload.update(model.get("params") or {})
 
-    return LLMRequest(provider=suite.provider, payload=payload)
+    return LLMRequest(provider=model["provider"], payload=payload)
+
+
+def _create_provider(provider_key: str) -> Any:
+    if provider_key == "openai":
+        return OpenAIResponsesProvider()
+    if provider_key == "lmstudio":
+        return LMStudioResponsesProvider()
+    if provider_key == "gemini":
+        return GeminiGenerateContentProvider()
+    if provider_key == "anthropic":
+        return AnthropicMessagesProvider()
+    raise ValueError(f"Unsupported provider: {provider_key}")
 
 
 def _case_expected(case: Dict[str, Any], expected_from: str) -> Any:
@@ -83,7 +139,7 @@ def _eval_case(suite: SuiteConfig, case: Dict[str, Any], response_text: str) -> 
         if etype == "json_schema":
             schema = cfg.get("schema")
             if not schema and suite.request.response_format:
-                schema = suite.request.response_format.schema
+                schema = suite.request.response_format.schema_
             if not schema:
                 return EvalResult(False, FailureReason.SCHEMA_INVALID, {"error": "missing schema"})
             strict = cfg.get("strict", True)
@@ -148,14 +204,14 @@ def run_suite(
     os.makedirs(results_root, exist_ok=True)
     attempts_path = os.path.join(results_root, "attempts.jsonl")
 
-    # provider selection
-    if provider_override is not None:
-        provider = provider_override
-    else:
-        if suite.provider == "openai":
-            provider = OpenAIResponsesProvider()
-        else:
-            raise ValueError(f"Unsupported provider: {suite.provider}")
+    providers: Dict[str, Any] = {}
+
+    def provider_for(provider_key: str) -> Any:
+        if provider_override is not None:
+            return provider_override
+        if provider_key not in providers:
+            providers[provider_key] = _create_provider(provider_key)
+        return providers[provider_key]
 
     started_at = _now_iso()
     attempts: List[AttemptRecord] = []
@@ -185,55 +241,92 @@ def run_suite(
     redact_enabled = redact or bool(suite.redact and suite.redact.enabled)
 
     with open(attempts_path, "w", encoding="utf-8") as attempts_file:
-        for run_idx in range(1, runs + 1):
-            for model in models.models:
-                # warmup
-                for w in range(warmup):
-                    if should_stop():
-                        break
-                    case = cases[w % len(cases)]
-                    attempt = _run_attempt(
-                        suite,
-                        model,
-                        case,
-                        provider,
-                        pricing,
-                        run_idx,
-                        is_warmup=True,
-                        redact=redact_enabled,
-                        save_requests=save_requests,
-                        save_raw_responses=save_raw_responses,
-                    )
-                    attempts_file.write(json.dumps(attempt.to_dict()) + "\n")
-                    total_requests += 1
-                    if attempt.cost_usd:
-                        total_cost += attempt.cost_usd
-                if should_stop():
-                    break
+        total_per_model = runs * (len(cases) + warmup)
+        total_overall = total_per_model * len(models.models)
+        disable_progress = not sys.stderr.isatty()
+        overall_bar = _make_progress(total_overall, "Overall", position=0, disable=disable_progress)
+        overall_done = 0
+        try:
+            for run_idx in range(1, runs + 1):
+                for model in models.models:
+                    label = model.label or model.name
+                    model_bar = _make_progress(total_per_model, f"Model {label}", position=1, disable=disable_progress)
+                    model_done = 0
+                    model_cost = 0.0
+                    try:
+                        # warmup
+                        for w in range(warmup):
+                            if should_stop():
+                                break
+                            case = cases[w % len(cases)]
+                            attempt = _run_attempt(
+                                suite,
+                                model,
+                                case,
+                                provider_for(model.provider),
+                                pricing,
+                                run_idx,
+                                is_warmup=True,
+                                redact=redact_enabled,
+                                save_requests=save_requests,
+                                save_raw_responses=save_raw_responses,
+                            )
+                            attempts_file.write(json.dumps(attempt.to_dict()) + "\n")
+                            total_requests += 1
+                            if attempt.cost_usd is not None:
+                                total_cost += attempt.cost_usd
+                                model_cost += attempt.cost_usd
+                            overall_done += 1
+                            model_done += 1
+                            overall_bar.update(1)
+                            model_bar.update(1)
+                            if pricing is not None and overall_done:
+                                overall_est = (total_cost / overall_done) * total_overall
+                                overall_bar.set_postfix(cost=_format_usd(total_cost), est=_format_usd(overall_est))
+                            if pricing is not None and model_done:
+                                model_est = (model_cost / model_done) * total_per_model
+                                model_bar.set_postfix(cost=_format_usd(model_cost), est=_format_usd(model_est))
+                        if should_stop():
+                            break
 
-                for case in cases:
-                    if should_stop():
-                        break
-                    attempt = _run_attempt(
-                        suite,
-                        model,
-                        case,
-                        provider,
-                        pricing,
-                        run_idx,
-                        is_warmup=False,
-                        redact=redact_enabled,
-                        save_requests=save_requests,
-                        save_raw_responses=save_raw_responses,
-                    )
-                    attempts_file.write(json.dumps(attempt.to_dict()) + "\n")
-                    total_requests += 1
-                    if attempt.cost_usd:
-                        total_cost += attempt.cost_usd
+                        for case in cases:
+                            if should_stop():
+                                break
+                            attempt = _run_attempt(
+                                suite,
+                                model,
+                                case,
+                                provider_for(model.provider),
+                                pricing,
+                                run_idx,
+                                is_warmup=False,
+                                redact=redact_enabled,
+                                save_requests=save_requests,
+                                save_raw_responses=save_raw_responses,
+                            )
+                            attempts_file.write(json.dumps(attempt.to_dict()) + "\n")
+                            total_requests += 1
+                            if attempt.cost_usd is not None:
+                                total_cost += attempt.cost_usd
+                                model_cost += attempt.cost_usd
+                            overall_done += 1
+                            model_done += 1
+                            overall_bar.update(1)
+                            model_bar.update(1)
+                            if pricing is not None and overall_done:
+                                overall_est = (total_cost / overall_done) * total_overall
+                                overall_bar.set_postfix(cost=_format_usd(total_cost), est=_format_usd(overall_est))
+                            if pricing is not None and model_done:
+                                model_est = (model_cost / model_done) * total_per_model
+                                model_bar.set_postfix(cost=_format_usd(model_cost), est=_format_usd(model_est))
+                        if should_stop():
+                            break
+                    finally:
+                        model_bar.close()
                 if should_stop():
                     break
-            if should_stop():
-                break
+        finally:
+            overall_bar.close()
 
     # compute summary from attempts file
     attempts = _load_attempts(attempts_path)

@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional
 import requests
 
 from .base import ProviderClient, map_status_to_failure
+from ..env import load_env, get_openai_api_key
 from ..types import ErrorInfo, FailureReason, LLMRequest, LLMResponse, Usage
 
 
@@ -66,8 +67,9 @@ def _extract_usage(payload: Dict[str, Any]) -> Usage:
 
 class OpenAIResponsesProvider(ProviderClient):
     def __init__(self) -> None:
+        load_env()
         self.base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
-        self.api_key = os.getenv("OPENAI_API_KEY", "")
+        self.api_key = get_openai_api_key()
 
     def run(self, request: LLMRequest, timeout_s: int = 60) -> LLMResponse:
         if not self.api_key:
